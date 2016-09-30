@@ -1,0 +1,6 @@
+name = Lasso Test Integration
+description = Test Lasso integration with a webform.
+core = 7.x
+package = Webform
+dependencies[] = webform
+configure = admin/config/content/lasso

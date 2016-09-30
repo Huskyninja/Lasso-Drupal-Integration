@@ -1,0 +1,158 @@
+<?php
+
+function lasso_webform_extra_form_alter(&$form, &$form_state, $form_id) {
+   //only want form with nid 119 to submit externally 
+   //Note that "webform_client_form_119" means modify the Webform form for the node with NID "1171". Adjust to match whichever webform node's form you're modifying
+   if($form_id == 'webform_client_form_119') {
+            //$form['#submit'][] = 'lasso_webform_extra_submit';
+
+			$form['#submit'][] = 'lasso_webform_extra_curl_submit';
+			
+       }
+}
+
+function lasso_webform_extra_submit($form, &$form_state) {
+
+    $options = array(
+		'method' => 'POST',
+		'data' => array(
+			'FirstName' => $form_state['values']['submitted'][1],
+			'LastName' => $form_state['values']['submitted'][2],
+			'Email[Primary]' => $form_state['values']['submitted'][3],
+			'Phone[Home]' => $form_state['values']['submitted'][4],
+			'LassoUID' => $form_state['values']['submitted'][5],
+			'ClientID' => $form_state['values']['submitted'][6],
+			'ProjectID' => $form_state['values']['submitted'][7],			
+		),
+		'timeout' => 15,
+		'headers' => array(
+			'Content-Type' => 'application/x-www-form-urlencoded',
+			'X-Lasso-Auth' => 'Token=1234567,Version=1.0'
+			),
+	);
+	$options['data'] = http_build_query($options['data']);
+
+	$url = 'https://app.lassocrm.com/registrant_signup/test';
+
+	try {
+		$result = drupal_http_request($url, $options);
+		watchdog('Lasso Webform', 'Posted the following: '.print_r($options[data],TRUE));
+	} catch (Exception $e) {
+		watchdog('Lasso Webform', 'Error while posting. Message: !message', array('!message' => $e->getMessage()), WATCHDOG_ERROR);
+	}
+
+}
+
+function lasso_webform_extra_curl_submit($form, &$form_state) {
+
+
+	$curlData = array(
+		'FirstName' => $form_state['values']['submitted'][1],
+		'LastName' => $form_state['values']['submitted'][2],
+		'Emails[Primary]' => $form_state['values']['submitted'][3],
+		'Phones[Home]' => $form_state['values']['submitted'][4],
+		'LassoUID' => $form_state['values']['submitted'][5],
+		'ClientID' => $form_state['values']['submitted'][6],
+		'ProjectID' => $form_state['values']['submitted'][7],
+	);
+
+	
+	// check to see if this works now that the malformed error is dealt with
+	$curlQuery = http_build_query($curlData);
+	
+	// $curlQuery = sprintf('FirstName=%s&LastName=%s&Email[Primary]=%s&Phone[Home]=%s&LassoUID=%s&ClientID=%s&ProjectID=%s', $curlData['FirstName'], $curlData['LastName'], $curlData['Email[Primary]'], $curlData['Phone[Home]'], $curlData['LassoUID'], $curlData['ClientID'], $curlData['ProjectID']);
+	
+	
+	// do i need this var?
+	$url = 'https://app.lassocrm.com/registrant_signup/test';
+
+	$ch = curl_init();
+	// curl_setopt($ch, CURLOPT_URL, 'https://app.lassocrm.com/registrant_signup/test');
+	
+	curl_setopt($ch, CURLOPT_URL, variable_get('lasso_webform_url'));
+	
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $curlQuery);
+	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
+	// curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Lasso-Auth: Token=1234567,Version=1.0'));
+	curl_setopt($ch, CURLOPT_MAXREDIRS, 0);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+	// curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+	$result = curl_exec($ch);
+    $error = curl_error($ch);
+	
+	// $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	$response = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+	
+	if ($result === FALSE) {
+		watchdog('Lasso Webform', 'cURL Error: '.print_r(curl_error($ch),TRUE).' Error Code: '.print_r(curl_errno($ch),TRUE));
+		// watchdog('Lasso Webform', 'Failed to post using cURL: '.print_r($curlQuery,TRUE).' To: '.print_r($url,TRUE));
+	} else {
+		watchdog('Lasso Webform', 'Posted the following using cURL: '.print_r($curlQuery,TRUE).' Response: '.print_r($response,TRUE));
+	}
+	
+	curl_close($ch);
+
+}
+
+
+
+
+
+
+
+
+
+
+function lasso_webform_extra_menu() {
+  $items = array();
+
+  $items['admin/config/content/lasso'] = array(
+    'title' => 'Remote Lasso URL',
+    'description' => 'The URL of the Lasso server.',
+    'page callback' => 'drupal_get_form',
+    'page arguments' => array('lasso_webform_extra_admin'),
+    'access arguments' => array('access administration pages'),
+    'type' => MENU_NORMAL_ITEM,
+  );
+
+  return $items;
+}
+
+function lasso_webform_extra_admin($form, &$form_state) {
+
+  $form['lasso_webform_url'] = array(
+    '#type' => 'textfield',
+    '#title' => t('The Lasso URL'),
+    '#default_value' => variable_get('lasso_webform_url', 3),
+    '#size' => 50,
+    '#maxlength' => 50,
+    '#description' => t('The URL of the Lasso server.'),
+    '#required' => TRUE,
+  );
+
+  return system_settings_form($form);
+
+ }
+ 
+ function lasso_webform_extra_contents() {
+	 
+	 $today = getdate();
+	 
+	 $start_time = mktime(0, 0, 0, $today['mon'],($today['mday'] = 7), $today['year']);
+	 $end_time = time();
+	 
+	 $lasso_url = variable_get('lasso_webform_url', 3);
+	 
+	 $query = db_select('node', 'n')
+		->fields('n', array('nid', 'title', 'created'))
+		->condition('status', 1) //Published.
+		->condition('created', array($start_time, $end_time), 'BETWEEN')
+		->orderBy('created', 'DESC') //Most recent first.
+		->range(0, $lasso_url) //NEW LINE
+		->execute();
+	return $query;
+
+}
