@@ -45,7 +45,6 @@ function lasso_webform_extra_submit($form, &$form_state) {
 
 function lasso_webform_extra_curl_submit($form, &$form_state) {
 
-
 	$curlData = array(
 		'FirstName' => $form_state['values']['submitted'][1],
 		'LastName' => $form_state['values']['submitted'][2],
@@ -56,28 +55,18 @@ function lasso_webform_extra_curl_submit($form, &$form_state) {
 		'ProjectID' => $form_state['values']['submitted'][7],
 	);
 
-	
-	// check to see if this works now that the malformed error is dealt with
 	$curlQuery = http_build_query($curlData);
-	
-	// $curlQuery = sprintf('FirstName=%s&LastName=%s&Email[Primary]=%s&Phone[Home]=%s&LassoUID=%s&ClientID=%s&ProjectID=%s', $curlData['FirstName'], $curlData['LastName'], $curlData['Email[Primary]'], $curlData['Phone[Home]'], $curlData['LassoUID'], $curlData['ClientID'], $curlData['ProjectID']);
-	
 	
 	// do i need this var?
 	$url = 'https://app.lassocrm.com/registrant_signup/test';
 
 	$ch = curl_init();
-	// curl_setopt($ch, CURLOPT_URL, 'https://app.lassocrm.com/registrant_signup/test');
-	
 	curl_setopt($ch, CURLOPT_URL, variable_get('lasso_webform_url'));
-	
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $curlQuery);
 	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
-	// curl_setopt($ch, CURLOPT_HTTPHEADER, array('X-Lasso-Auth: Token=1234567,Version=1.0'));
 	curl_setopt($ch, CURLOPT_MAXREDIRS, 0);
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
 	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-	// curl_setopt($ch, CURLOPT_RETURNTRANSFER, 1);
 	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 
 	$result = curl_exec($ch);
@@ -87,8 +76,7 @@ function lasso_webform_extra_curl_submit($form, &$form_state) {
 	$response = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 	
 	if ($result === FALSE) {
-		watchdog('Lasso Webform', 'cURL Error: '.print_r(curl_error($ch),TRUE).' Error Code: '.print_r(curl_errno($ch),TRUE));
-		// watchdog('Lasso Webform', 'Failed to post using cURL: '.print_r($curlQuery,TRUE).' To: '.print_r($url,TRUE));
+		watchdog('Lasso Webform', 'Failed to post using cURL: '.print_r($curlQuery,TRUE).' Target URL: '.print_r($url,TRUE).' Error: '.print_r(curl_error($ch),TRUE).' Error Code: '.print_r(curl_errno($ch),TRUE));
 	} else {
 		watchdog('Lasso Webform', 'Posted the following using cURL: '.print_r($curlQuery,TRUE).' Response: '.print_r($response,TRUE));
 	}
@@ -97,14 +85,7 @@ function lasso_webform_extra_curl_submit($form, &$form_state) {
 
 }
 
-
-
-
-
-
-
-
-
+// Drupal admin functions
 
 function lasso_webform_extra_menu() {
   $items = array();
@@ -135,7 +116,7 @@ function lasso_webform_extra_admin($form, &$form_state) {
 
   return system_settings_form($form);
 
- }
+}
  
  function lasso_webform_extra_contents() {
 	 
