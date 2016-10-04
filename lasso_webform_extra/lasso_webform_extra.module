@@ -88,9 +88,12 @@ function lasso_webform_extra_curl_submit(&$form, &$form_state) {
 	
 	// test url = https://app.lassocrm.com/registrant_signup/test
 	// main url = https://app.lassocrm.com/registrant_signup/
+	
+	$url = variable_get('lasso_webform_url');
 
 	$ch = curl_init();
-	curl_setopt($ch, CURLOPT_URL, variable_get('lasso_webform_url'));
+	// curl_setopt($ch, CURLOPT_URL, variable_get('lasso_webform_url'));
+	curl_setopt($ch, CURLOPT_URL, $url);
 	curl_setopt($ch, CURLOPT_POSTFIELDS, $curlQuery);
 	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
 	curl_setopt($ch, CURLOPT_MAXREDIRS, 0);
