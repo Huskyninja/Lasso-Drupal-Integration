@@ -4,66 +4,71 @@ function lasso_webform_extra_form_alter(&$form, &$form_state, $form_id) {
    //only want form with nid 119 to submit externally 
    //Note that "webform_client_form_119" means modify the Webform form for the node with NID "1171". Adjust to match whichever webform node's form you're modifying
    if($form_id == 'webform_client_form_119') {
-            //$form['#submit'][] = 'lasso_webform_extra_submit';
 
 			$form['#submit'][] = 'lasso_webform_extra_curl_submit';
 			
        }
 }
 
-function lasso_webform_extra_submit($form, &$form_state) {
-
-    $options = array(
-		'method' => 'POST',
-		'data' => array(
-			'FirstName' => $form_state['values']['submitted'][1],
-			'LastName' => $form_state['values']['submitted'][2],
-			'Email[Primary]' => $form_state['values']['submitted'][3],
-			'Phone[Home]' => $form_state['values']['submitted'][4],
-			'LassoUID' => $form_state['values']['submitted'][5],
-			'ClientID' => $form_state['values']['submitted'][6],
-			'ProjectID' => $form_state['values']['submitted'][7],
-			'SecondarySourceTypeID' => $form_state['values']['submitted'][8],
-			'RatingID' => $form_state['values']['submitted'][9],
-		),
-		'timeout' => 15,
-		'headers' => array(
-			'Content-Type' => 'application/x-www-form-urlencoded',
-			'X-Lasso-Auth' => 'Token=1234567,Version=1.0'
-			),
-	);
-	$options['data'] = http_build_query($options['data']);
-
-	$url = 'https://app.lassocrm.com/registrant_signup/test';
-
-	try {
-		$result = drupal_http_request($url, $options);
-		watchdog('Lasso Webform', 'Posted the following: '.print_r($options[data],TRUE));
-	} catch (Exception $e) {
-		watchdog('Lasso Webform', 'Error while posting. Message: !message', array('!message' => $e->getMessage()), WATCHDOG_ERROR);
-	}
-
-}
-
-function lasso_webform_extra_curl_submit($form, &$form_state) {
-
+function lasso_webform_extra_curl_submit(&$form, &$form_state) {
+/*
 	$curlData = array(
-		'FirstName' => $form_state['values']['submitted'][1],
-		'LastName' => $form_state['values']['submitted'][2],
-		'Emails[Primary]' => $form_state['values']['submitted'][3],
-		'Phones[Home]' => $form_state['values']['submitted'][4],
-		'LassoUID' => $form_state['values']['submitted'][5],
-		'ClientID' => $form_state['values']['submitted'][6],
-		'ProjectID' => $form_state['values']['submitted'][7],
-		'SecondarySourceTypeID' => $form_state['values']['submitted'][8],
-		'RatingID' => $form_state['values']['submitted'][9],
+		'FirstName' => $form['submitted']['firstName']['#value'],
+		'LastName' => $form['submitted']['lastName']['#value'],
+		'Emails[Primary]' => $form['submitted']['email']['#value'],
+		'Phones[Home]' => $form['submitted']['phone']['#value'],
+		'LassoUID' => $form['submitted']['lassoUID']['#value'],
+		'ClientID' => $form['submitted']['clientID']['#value'],
+		'ProjectID' => $form['submitted']['projectID']['#value'],
+		'SecondarySourceTypeID' => $form['submitted']['SecondarySourceTypeID']['#value'],
+		'RatingID' => $form['submitted']['RatingID']['#value'],
 	);
+*/
+	$curlData = array();
+	
+	foreach ($form['submitted'] as $key => $value) {
+		
+		if ($key == 'firstName') {
+			$secondCurlData['FirstName'] = $form['submitted']['firstName']['#value'];
+		}
+		
+		if ($key == 'lastName') {
+			$secondCurlData['LastName'] = $form['submitted']['lastName']['#value'];
+		}
+		
+		if ($key == 'email') {
+			$secondCurlData['Emails[Primary]'] = $form['submitted']['email']['#value'];
+		}
+		
+		if ($key == 'phone') {
+			$secondCurlData['Phones[Home]'] = $form['submitted']['phone']['#value'];
+		}
+		
+		if ($key == 'lassoUID') {
+			$secondCurlData['LassoUID'] = $form['submitted']['lassoUID']['#value'];
+		}
+		
+		if ($key == 'clientID') {
+			$secondCurlData['ClientID'] = $form['submitted']['clientID']['#value'];
+		}
+		
+		if ($key == 'projectID') {
+			$secondCurlData['ProjectID'] = $form['submitted']['projectID']['#value'];
+		}
+		
+		if ($key == 'SecondarySourceTypeID') {
+			$secondCurlData['SecondarySourceTypeID'] = $form['submitted']['SecondarySourceTypeID']['#value'];
+		}
+		if ($key == 'RatingID') {
+			$secondCurlData['RatingID'] = $form['submitted']['RatingID']['#value'];
+		}
+		
+	}
 
 	$curlQuery = http_build_query($curlData);
 	
-	// do i need this var?
-	$url = 'https://app.lassocrm.com/registrant_signup/test';
-	//https://app.lassocrm.com/registrant_signup/
+	// test url = https://app.lassocrm.com/registrant_signup/test
+	// main url = https://app.lassocrm.com/registrant_signup/
 
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, variable_get('lasso_webform_url'));
