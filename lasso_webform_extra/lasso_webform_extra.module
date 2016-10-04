@@ -134,7 +134,7 @@ function lasso_webform_extra_admin($form, &$form_state) {
   
 	$form['lasso_webform_include'] = array (
 		'#type' => 'checkboxes',
-		'#title' => 'Select Webform IDs',
+		'#title' => 'Select Webforms By Node ID',
 		'#description' => t('Please select the webforms you wish to integrate with Lasso by webform node ID'),
 		'#default_value' => variable_get('lasso_webform_include', array('')),
 		'#options' => $nids,
