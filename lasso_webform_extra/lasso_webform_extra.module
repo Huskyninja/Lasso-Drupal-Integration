@@ -115,69 +115,45 @@ function lasso_webform_extra_menu() {
 
 function lasso_webform_extra_admin($form, &$form_state) {
 
-  $form['lasso_webform_url'] = array(
-    '#type' => 'textfield',
-    '#title' => t('The Lasso URL'),
-    '#default_value' => variable_get('lasso_webform_url', 3),
-    '#size' => 50,
-    '#maxlength' => 50,
-    '#description' => t('The URL of the Lasso server.'),
-    '#required' => TRUE,
-  );
-  
+	$form['lasso_webform_url'] = array(
+		'#type' => 'textfield',
+		'#title' => t('The Lasso URL'),
+		'#default_value' => variable_get('lasso_webform_url', array('')),
+		'#size' => 50,
+		'#maxlength' => 50,
+		'#description' => t('The URL of the Lasso server.'),
+		'#required' => TRUE,
+	);
 
-  // $nodes = node_load_multiple(array(), array('type' => 'webform'));
-    
-  $types = node_type_get_types();
-  foreach($types as $node_type) {
-    $nodetypes[$node_type->type] = $node_type->name;
-  }
+	$node_type = "webform";
+	$result = db_query("SELECT nid FROM node WHERE type = :nodeType ", array(':nodeType'=>$node_type));
+	$nids = array();
+	foreach ($result as $obj) {
+		$nids[] = $obj->nid;
+	}
   
-  
-  
-$node_query = new EntityFieldQuery();
+	$form['lasso_webform_include'] = array (
+		'#type' => 'checkboxes',
+		'#title' => 'Select Webform IDs',
+		'#description' => t('Please select the webforms you wish to integrate with Lasso by webform node ID'),
+		'#default_value' => variable_get('lasso_webform_include', array('')),
+		'#options' => $nids,
+	);
 
-$node_query->entityCondition('entity_type', 'node')
-  ->entityCondition('bundle', 'webform')
-  ->propertyCondition('status', 1);
-
-$result = $node_query->execute();
-
-if (!empty($result['node'])) {
-  $nids = array_keys($result['node']);
-  $nodes = node_load_multiple($nids);
-
-  foreach ($nodes as $node) {
-    $node_id[$nodes->id] = $nodes->name;
-  }
-}
-  
-  
-  
-
-  
-  $form['lasso_webform_include'] = array (
-	'#type' => 'checkboxes',
-	'#title' => 'Select Webforms',
-	'#description' => t('Please select the webforms you wish to integrate with Lasso'),
-	'#default_value' => variable_get('lasso_webform_include', array('')),
-	'#options' => $node_id,
-  );
-
-  return system_settings_form($form);
+	return system_settings_form($form);
 
 }
  
- function lasso_webform_extra_contents() {
+function lasso_webform_extra_contents() {
 	 
-	 $today = getdate();
+	$today = getdate();
 	 
-	 $start_time = mktime(0, 0, 0, $today['mon'],($today['mday'] = 7), $today['year']);
-	 $end_time = time();
+	$start_time = mktime(0, 0, 0, $today['mon'],($today['mday'] = 7), $today['year']);
+	$end_time = time();
 	 
-	 $lasso_url = variable_get('lasso_webform_url', 3);
+	$lasso_url = variable_get('lasso_webform_url', 3);
 	 
-	 $query = db_select('node', 'n')
+	$query = db_select('node', 'n')
 		->fields('n', array('nid', 'title', 'created'))
 		->condition('status', 1) //Published.
 		->condition('created', array($start_time, $end_time), 'BETWEEN')
