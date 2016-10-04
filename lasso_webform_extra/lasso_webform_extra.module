@@ -3,11 +3,29 @@
 function lasso_webform_extra_form_alter(&$form, &$form_state, $form_id) {
    //only want form with nid 119 to submit externally 
    //Note that "webform_client_form_119" means modify the Webform form for the node with NID "1171". Adjust to match whichever webform node's form you're modifying
+   
+   $active_form = variable_get('lasso_webform_id');
+   $form_arr = explode(",",$active_form);
+   
+   foreach ($form_arr as $form_value) {
+	   if ($form_id == $form_value) {
+		   $form['#submit'][] = 'lasso_webform_extra_curl_submit';
+	   }
+   }
+   
+   /*
+   if ($form_id == $active_form) {
+	   $form['#submit'][] = 'lasso_webform_extra_curl_submit';
+   }
+   */
+   
+   /*
    if($form_id == 'webform_client_form_119') {
 
 			$form['#submit'][] = 'lasso_webform_extra_curl_submit';
 			
-       }
+	}
+	*/
 }
 
 function lasso_webform_extra_curl_submit(&$form, &$form_state) {
@@ -124,20 +142,37 @@ function lasso_webform_extra_admin($form, &$form_state) {
 		'#description' => t('The URL of the Lasso server.'),
 		'#required' => TRUE,
 	);
-
+/*
 	$node_type = "webform";
 	$result = db_query("SELECT nid FROM node WHERE type = :nodeType ", array(':nodeType'=>$node_type));
 	$nids = array();
 	foreach ($result as $obj) {
 		$nids[] = $obj->nid;
 	}
-  
+
+	
+	// first checkbox is always selected for some reason.
+	// is there a better way to list all webforms?
+	
+	// $form['lasso_webform_include']['lasso_webform_select'] = array (
+	
 	$form['lasso_webform_include'] = array (
 		'#type' => 'checkboxes',
 		'#title' => 'Select Webforms By Node ID',
 		'#description' => t('Please select the webforms you wish to integrate with Lasso by webform node ID'),
-		'#default_value' => variable_get('lasso_webform_include', array('')),
+		'#default_value' => variable_get('lasso_webform_include', array()),
 		'#options' => $nids,
+	);
+*/
+
+	$form['lasso_webform_id'] = array(
+		'#type' => 'textfield',
+		'#title' => t('webform form id'),
+		'#default_value' => variable_get('lasso_webform_id', array('')),
+		'#size' => 50,
+		'#maxlength' => 50,
+		'#description' => t('the form id'),
+		'#required' => TRUE,
 	);
 
 	return system_settings_form($form);
@@ -151,7 +186,7 @@ function lasso_webform_extra_contents() {
 	$start_time = mktime(0, 0, 0, $today['mon'],($today['mday'] = 7), $today['year']);
 	$end_time = time();
 	 
-	$lasso_url = variable_get('lasso_webform_url', 3);
+	$lasso_url = variable_get('lasso_webform_url', array(''));
 	 
 	$query = db_select('node', 'n')
 		->fields('n', array('nid', 'title', 'created'))
