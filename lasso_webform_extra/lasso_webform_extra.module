@@ -29,38 +29,39 @@ function lasso_webform_extra_curl_submit(&$form, &$form_state) {
 	foreach ($form['submitted'] as $key => $value) {
 		
 		if ($key == 'firstName') {
-			$secondCurlData['FirstName'] = $form['submitted']['firstName']['#value'];
+			$curlData['FirstName'] = $form['submitted']['firstName']['#value'];
 		}
 		
 		if ($key == 'lastName') {
-			$secondCurlData['LastName'] = $form['submitted']['lastName']['#value'];
+			$curlData['LastName'] = $form['submitted']['lastName']['#value'];
 		}
 		
 		if ($key == 'email') {
-			$secondCurlData['Emails[Primary]'] = $form['submitted']['email']['#value'];
+			$curlData['Emails[Primary]'] = $form['submitted']['email']['#value'];
 		}
 		
 		if ($key == 'phone') {
-			$secondCurlData['Phones[Home]'] = $form['submitted']['phone']['#value'];
+			$curlData['Phones[Home]'] = $form['submitted']['phone']['#value'];
 		}
 		
 		if ($key == 'lassoUID') {
-			$secondCurlData['LassoUID'] = $form['submitted']['lassoUID']['#value'];
+			$curlData['LassoUID'] = $form['submitted']['lassoUID']['#value'];
 		}
 		
 		if ($key == 'clientID') {
-			$secondCurlData['ClientID'] = $form['submitted']['clientID']['#value'];
+			$curlData['ClientID'] = $form['submitted']['clientID']['#value'];
 		}
 		
 		if ($key == 'projectID') {
-			$secondCurlData['ProjectID'] = $form['submitted']['projectID']['#value'];
+			$curlData['ProjectID'] = $form['submitted']['projectID']['#value'];
 		}
 		
 		if ($key == 'SecondarySourceTypeID') {
-			$secondCurlData['SecondarySourceTypeID'] = $form['submitted']['SecondarySourceTypeID']['#value'];
+			$curlData['SecondarySourceTypeID'] = $form['submitted']['SecondarySourceTypeID']['#value'];
 		}
+		
 		if ($key == 'RatingID') {
-			$secondCurlData['RatingID'] = $form['submitted']['RatingID']['#value'];
+			$curlData['RatingID'] = $form['submitted']['RatingID']['#value'];
 		}
 		
 	}
