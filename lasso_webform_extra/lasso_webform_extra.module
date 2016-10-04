@@ -22,7 +22,9 @@ function lasso_webform_extra_submit($form, &$form_state) {
 			'Phone[Home]' => $form_state['values']['submitted'][4],
 			'LassoUID' => $form_state['values']['submitted'][5],
 			'ClientID' => $form_state['values']['submitted'][6],
-			'ProjectID' => $form_state['values']['submitted'][7],			
+			'ProjectID' => $form_state['values']['submitted'][7],
+			'SecondarySourceTypeID' => $form_state['values']['submitted'][8],
+			'RatingID' => $form_state['values']['submitted'][9],
 		),
 		'timeout' => 15,
 		'headers' => array(
@@ -53,12 +55,15 @@ function lasso_webform_extra_curl_submit($form, &$form_state) {
 		'LassoUID' => $form_state['values']['submitted'][5],
 		'ClientID' => $form_state['values']['submitted'][6],
 		'ProjectID' => $form_state['values']['submitted'][7],
+		'SecondarySourceTypeID' => $form_state['values']['submitted'][8],
+		'RatingID' => $form_state['values']['submitted'][9],
 	);
 
 	$curlQuery = http_build_query($curlData);
 	
 	// do i need this var?
 	$url = 'https://app.lassocrm.com/registrant_signup/test';
+	//https://app.lassocrm.com/registrant_signup/
 
 	$ch = curl_init();
 	curl_setopt($ch, CURLOPT_URL, variable_get('lasso_webform_url'));
@@ -78,7 +83,7 @@ function lasso_webform_extra_curl_submit($form, &$form_state) {
 	if ($result === FALSE) {
 		watchdog('Lasso Webform', 'Failed to post using cURL: '.print_r($curlQuery,TRUE).' Target URL: '.print_r($url,TRUE).' Error: '.print_r(curl_error($ch),TRUE).' Error Code: '.print_r(curl_errno($ch),TRUE));
 	} else {
-		watchdog('Lasso Webform', 'Posted the following using cURL: '.print_r($curlQuery,TRUE).' Response: '.print_r($response,TRUE));
+		watchdog('Lasso Webform', 'Posted the following using cURL: '.print_r($curlQuery,TRUE).' Target URL: '.print_r($url,TRUE).' Response: '.print_r($response,TRUE));
 	}
 	
 	curl_close($ch);
