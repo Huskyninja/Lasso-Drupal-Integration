@@ -1,5 +1,5 @@
-name = Lasso Test Integration
-description = Test Lasso integration with a webform.
+name = Lasso Webform Integration
+description = Lasso RESTful API integration with Drupal Webforms.
 core = 7.x
 package = Webform
 dependencies[] = webform

@@ -1,8 +1,8 @@
 <?php
 
 function lasso_webform_extra_form_alter(&$form, &$form_state, $form_id) {
-   //only want form with nid 119 to submit externally 
-   //Note that "webform_client_form_119" means modify the Webform form for the node with NID "1171". Adjust to match whichever webform node's form you're modifying
+
+   // for internal testing purposes we are using "webform_client_form_119"
    
    $active_form = variable_get('lasso_webform_id');
    $form_arr = explode(",",$active_form);
@@ -12,74 +12,148 @@ function lasso_webform_extra_form_alter(&$form, &$form_state, $form_id) {
 		   $form['#submit'][] = 'lasso_webform_extra_curl_submit';
 	   }
    }
-   
-   /*
-   if ($form_id == $active_form) {
-	   $form['#submit'][] = 'lasso_webform_extra_curl_submit';
-   }
-   */
-   
-   /*
-   if($form_id == 'webform_client_form_119') {
 
-			$form['#submit'][] = 'lasso_webform_extra_curl_submit';
-			
-	}
-	*/
 }
 
-function lasso_webform_extra_curl_submit(&$form, &$form_state) {
 /*
-	$curlData = array(
-		'FirstName' => $form['submitted']['firstName']['#value'],
-		'LastName' => $form['submitted']['lastName']['#value'],
-		'Emails[Primary]' => $form['submitted']['email']['#value'],
-		'Phones[Home]' => $form['submitted']['phone']['#value'],
-		'LassoUID' => $form['submitted']['lassoUID']['#value'],
-		'ClientID' => $form['submitted']['clientID']['#value'],
-		'ProjectID' => $form['submitted']['projectID']['#value'],
-		'SecondarySourceTypeID' => $form['submitted']['SecondarySourceTypeID']['#value'],
-		'RatingID' => $form['submitted']['RatingID']['#value'],
-	);
+
+***** Naming convention - Lasso's values to the module's values *****
+
+First Name - first_name
+Last Name - last_name
+Emails[Primary] - emails_primary
+Emails[Secondary] - emails_secondary
+Emails[Tertiary] - emails_tertiary
+Phones[Home] - phones_home
+Phones[Cell] - phones_cell
+Phones[Work] - phones_work
+Phones[WorkExt] - phones_workext
+Phones[Fax] - phones_fax
+Phones[Pager] - phones_pager
+Address - address
+City - city
+Province - province
+PostalCode - postal_code
+Country - country
+NameTitle - name_title
+Company - company
+ContactPreference - contact_preference
+Comments - comments
+RatingID - rating_id
+SourceTypeID - source_type_id
+SecondarySourceTypeID - secondary_source_type_id
+LassoUID - lasso_uid
+ClientID - client_id
+Project ID - project_id
+
 */
+
+function lasso_webform_extra_curl_submit(&$form, &$form_state) {
+
+	// mapping Lasso's sometimes unusual required naming convention to the module's naming convention
+
 	$curlData = array();
 	
 	foreach ($form['submitted'] as $key => $value) {
 		
-		if ($key == 'firstName') {
-			$curlData['FirstName'] = $form['submitted']['firstName']['#value'];
+		if ($key == 'first_name') {
+			$curlData['FirstName'] = $form['submitted']['first_name']['#value'];
 		}
 		
-		if ($key == 'lastName') {
-			$curlData['LastName'] = $form['submitted']['lastName']['#value'];
+		if ($key == 'last_name') {
+			$curlData['LastName'] = $form['submitted']['last_name']['#value'];
 		}
 		
-		if ($key == 'email') {
-			$curlData['Emails[Primary]'] = $form['submitted']['email']['#value'];
+		if ($key == 'emails_primary') {
+			$curlData['Emails[Primary]'] = $form['submitted']['emails_primary']['#value'];
 		}
 		
-		if ($key == 'phone') {
-			$curlData['Phones[Home]'] = $form['submitted']['phone']['#value'];
+		if ($key == 'emails_secondary') {
+			$curlData['Emails[Secondary]'] = $form['submitted']['emails_secondary']['#value'];
 		}
 		
-		if ($key == 'lassoUID') {
-			$curlData['LassoUID'] = $form['submitted']['lassoUID']['#value'];
+		if ($key == 'emails_tertiary') {
+			$curlData['Emails[Tertiary]'] = $form['submitted']['emails_tertiary']['#value'];
 		}
 		
-		if ($key == 'clientID') {
-			$curlData['ClientID'] = $form['submitted']['clientID']['#value'];
+		if ($key == 'phones_home') {
+			$curlData['Phones[Home]'] = $form['submitted']['phones_home']['#value'];
 		}
 		
-		if ($key == 'projectID') {
-			$curlData['ProjectID'] = $form['submitted']['projectID']['#value'];
+		if ($key == 'phones_cell') {
+			$curlData['Phones[Cell]'] = $form['submitted']['phones_cell']['#value'];
 		}
 		
-		if ($key == 'SecondarySourceTypeID') {
-			$curlData['SecondarySourceTypeID'] = $form['submitted']['SecondarySourceTypeID']['#value'];
+		if ($key == 'phones_work') {
+			$curlData['Phones[Work]'] = $form['submitted']['phones_work']['#value'];
 		}
 		
-		if ($key == 'RatingID') {
-			$curlData['RatingID'] = $form['submitted']['RatingID']['#value'];
+		if ($key == 'phones_workext') {
+			$curlData['Phones[WorkExt]'] = $form['submitted']['phones_workext']['#value'];
+		}
+		
+		if ($key == 'phones_fax') {
+			$curlData['Phones[Fax]'] = $form['submitted']['phones_fax']['#value'];
+		}
+		
+		if ($key == 'phones_pager') {
+			$curlData['Phones[Pager]'] = $form['submitted']['phones_pager']['#value'];
+		}
+		
+		if ($key == 'address') {
+			$curlData['Address'] = $form['submitted']['address']['#value'];
+		}
+		
+		if ($key == 'city') {
+			$curlData['City'] = $form['submitted']['city']['#value'];
+		}
+		
+		if ($key == 'province') {
+			$curlData['Province'] = $form['submitted']['province']['#value'];
+		}
+		
+		if ($key == 'postal_code') {
+			$curlData['PostalCode'] = $form['submitted']['postal_code']['#value'];
+		}
+		
+		if ($key == 'country') {
+			$curlData['Country'] = $form['submitted']['country']['#value'];
+		}
+		
+		if ($key == 'name_title') {
+			$curlData['NameTitle'] = $form['submitted']['name_title']['#value'];
+		}
+		
+		if ($key == 'company') {
+			$curlData['Company'] = $form['submitted']['company']['#value'];
+		}
+		
+		if ($key == 'contact_preference') {
+			$curlData['ContactPreference'] = $form['submitted']['contact_preference']['#value'];
+		}
+		
+		if ($key == 'comments') {
+			$curlData['Comments'] = $form['submitted']['comments']['#value'];
+		}
+		
+		if ($key == 'lasso_uid') {
+			$curlData['LassoUID'] = $form['submitted']['lasso_uid']['#value'];
+		}
+		
+		if ($key == 'client_id') {
+			$curlData['ClientID'] = $form['submitted']['client_id']['#value'];
+		}
+		
+		if ($key == 'project_id') {
+			$curlData['ProjectID'] = $form['submitted']['project_id']['#value'];
+		}
+		
+		if ($key == 'secondary_source_type_id') {
+			$curlData['SecondarySourceTypeID'] = $form['submitted']['secondary_source_type_id']['#value'];
+		}
+		
+		if ($key == 'rating_id') {
+			$curlData['RatingID'] = $form['submitted']['rating_id']['#value'];
 		}
 		
 	}
@@ -108,7 +182,7 @@ function lasso_webform_extra_curl_submit(&$form, &$form_state) {
 	$response = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 	
 	if ($result === FALSE) {
-		watchdog('Lasso Webform', 'Failed to post using cURL:<br>'.print_r($curlQuery,TRUE).'<br>Target URL: '.print_r($url,TRUE).'<br>Error: '.print_r(curl_error($ch),TRUE).' Error Code: '.print_r(curl_errno($ch),TRUE));
+		watchdog('Lasso Webform', 'Failed to post using cURL:<br>'.print_r($curlQuery,TRUE).'<br>Target URL: '.print_r($url,TRUE).'<br>Error: '.print_r(curl_error($ch),TRUE).'<br>Error Code: '.print_r(curl_errno($ch),TRUE), array(), WATCHDOG_ERROR);
 	} else {
 		watchdog('Lasso Webform', 'Posted the following using cURL:<br>'.print_r($curlQuery,TRUE).'<br>Target URL: '.print_r($url,TRUE).'<br>Response: '.print_r($response,TRUE));
 	}
@@ -140,33 +214,11 @@ function lasso_webform_extra_admin($form, &$form_state) {
 		'#type' => 'textfield',
 		'#title' => t('The Lasso URL'),
 		'#default_value' => variable_get('lasso_webform_url', array('')),
-		'#size' => 50,
-		'#maxlength' => 50,
+		'#size' => 100,
+		// '#maxlength' => 50,
 		'#description' => t('The URL of the Lasso server.'),
 		'#required' => TRUE,
 	);
-/*
-	$node_type = "webform";
-	$result = db_query("SELECT nid FROM node WHERE type = :nodeType ", array(':nodeType'=>$node_type));
-	$nids = array();
-	foreach ($result as $obj) {
-		$nids[] = $obj->nid;
-	}
-
-	
-	// first checkbox is always selected for some reason.
-	// is there a better way to list all webforms?
-	
-	// $form['lasso_webform_include']['lasso_webform_select'] = array (
-	
-	$form['lasso_webform_include'] = array (
-		'#type' => 'checkboxes',
-		'#title' => 'Select Webforms By Node ID',
-		'#description' => t('Please select the webforms you wish to integrate with Lasso by webform node ID'),
-		'#default_value' => variable_get('lasso_webform_include', array()),
-		'#options' => $nids,
-	);
-*/
 
 	$form['lasso_webform_id'] = array(
 		'#type' => 'textfield',
