@@ -8,25 +8,26 @@ Requirements:
 
 Quick Start:
 
-1. Ensure you have both Webform 4.x or greater installed on your Drupal instance and cURL installed on your host server.
+1. Ensure you have both Webform 4.x or greater installed on your Drupal instance and cURL installed on your host server
 
 2. Install the module as normal
 
-3. Enter the Lasso target URL and any Webform IDs (comma delinated) in the Lasso Integration configuration (admin/config/content/lasso).
+3. Enter the Lasso target URL and any Webform IDs (comma delineated) in the Lasso Integration configuration (admin/config/content/lasso).
 
 4. Set up your Webform's form fields so it conforms with Lasso's API and this module's Form Key requirements (see list - below). Ensure that all hidden fields are set to Hidden Element under "Display".
 
-a. Form fields identified in Lasso's documentation call for several required fields, some as hidden fields (e.g. Lasso UID and Client ID). Ensure that all hidden fields are set to Hidden Element under "Display", as Secure Value has not been tested. Please refer to your Lasso documentation for more information.
+5. Form fields identified in Lasso's documentation call for several required fields, some as hidden fields (e.g. Lasso UID and Client ID). Ensure that all hidden fields are set to Hidden Element under "Display", as Secure Value has not been tested. Please refer to your Lasso documentation for more information.
 
-5. Test. Be successful. Leave work early.
+6. Test. Be successful. Leave work early.
 
 More Information:
 
-This module is farily simple in operation, and is in need of serious optimization. Upon a Webform submit, the module uses webform_alter() to capture the event, and then checks the Webform ID aganst an array of saved IDs. If they match, this kicks off a function where the Weform data is parsed based on the Form Key value, converting them to Lasso friendly names and values in an array. Then this Lasso friendly array is converted to a query string, and finally passed to cURL, where the query string is posted to the Lasso API. Each post is recorded to the Drupal log. (Note to self: create a de-bug option so only cURL errors are saved by default.)
+This module is fairly simple in operation, and is in need of serious optimization. Upon a Webform submit, the module uses webform_alter() to capture the event, and then checks the Webform ID against an array of saved IDs. If they match, this kicks off a function where the Weform data is parsed based on the Form Key value, converting them to Lasso friendly names and values in an array. Then this Lasso friendly array is converted to a query string, and finally passed to cURL, where the query string is posted to the Lasso API. Each post is recorded to the Drupal log. (Note to self: create a de-bug option so only cURL errors are saved by default.)
 
-Here is the list of supported Lasso query variables and their supported Webform Form Keys. I tried to ensure that their standard would conform to what Drupal will create automatically, but there is the potential for varience.
+Here is the list of supported Lasso query variables and their supported Webform Form Keys. I tried to ensure that their standard would conform to what Drupal will create automatically, but there is the potential for variance.
 
-At this stage, the module is not configured for multiple values (i.e. NameTitle and ContactPreference) in a select field.
+Please note: At this stage, the module is not configured for multiple values (i.e. NameTitle and ContactPreference) in a select field.
+
 
 	Lasso Form Field Name	-		Webform Form Key
 	-------------------------------------------------
@@ -57,6 +58,7 @@ At this stage, the module is not configured for multiple values (i.e. NameTitle 
 	ClientID				-		client_id
 	ProjectID				-		project_id
 
+	
 The following Lasso query variables are not supported.
 
 	Questions[XXXXX]
