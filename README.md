@@ -1,5 +1,5 @@
 # Lasso Drupal Webform Integration
-v 0.2.1
+v 0.2.2
 
 Integration with Drupal 7 Webform 4.x and Lasso Register API
 

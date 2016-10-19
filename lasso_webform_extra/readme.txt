@@ -1,4 +1,4 @@
-Lasso Webform Integration v 0.2.1
+Lasso Webform Integration v 0.2.2
 
 Requirements:
 

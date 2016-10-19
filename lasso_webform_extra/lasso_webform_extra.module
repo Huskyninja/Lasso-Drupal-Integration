@@ -173,7 +173,7 @@ function lasso_webform_extra_curl_submit(&$form, &$form_state) {
 		}
 		
 		if('questions_' == substr($key,0,10)) {
-			$qID = substr($key,11);
+			$qID = substr($key,10);
 			$qLassoID = 'Questions['.$qID.']';
 			$curlData[$qLassoID] = $form['submitted'][$key]['#value'];
 		}
