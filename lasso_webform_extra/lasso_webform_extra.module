@@ -52,7 +52,7 @@ domainAccountId - domain_account_id
 guid - guid
 
 Custom questions also supported:
-Questions[QUESTION-ID] - questions_QUESTION-ID
+Questions[XXXXX] - questions_XXXXX
 
 */
 

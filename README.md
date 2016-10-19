@@ -1,5 +1,5 @@
 # Lasso Drupal Webform Integration
-v 0.2
+v 0.2.1
 
 Integration with Drupal 7 Webform 4.x and Lasso Register API
 
@@ -59,15 +59,20 @@ Please note: At this stage, the module is not configured for multiple values (i.
 	LassoUID                -   lasso_uid
 	ClientID                -   client_id
 	ProjectID               -   project_id
+	domainAccountId			-	domain_account_id
+	guid					-	guid
+
+The Lasso query variable Questions is now supported using the following convention:
+
+	Questions[XXXXX]		-	questions_XXXXX
 
 The following Lasso query variables are not supported.
 
-	Questions[XXXXX]
 	SignupThankyouLink
 	SignupEmailLink
 	SignupEmailSubject
 
-This module was created by mlumadue for SageAge. @Copyleft - All wrongs reserved. 
+This module was created by Huskyninja for SageAge. @Copyleft - All wrongs reserved. 
 
 This program is free software: you can redistribute it and/or modify it under the terms of the GNU General Public License as published by the Free Software Foundation, either version 3 of the License, or(at your option) any later version.
 
