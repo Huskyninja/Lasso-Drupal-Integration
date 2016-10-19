@@ -47,6 +47,13 @@ LassoUID - lasso_uid
 ClientID - client_id
 Project ID - project_id
 
+For Lasso Tracking:
+domainAccountId - domain_account_id
+guid - guid
+
+Custom questions also supported:
+Questions[QUESTION-ID] - questions_QUESTION-ID
+
 */
 
 function lasso_webform_extra_curl_submit(&$form, &$form_state) {
@@ -155,6 +162,20 @@ function lasso_webform_extra_curl_submit(&$form, &$form_state) {
 		
 		if ($key == 'rating_id') {
 			$curlData['RatingID'] = $form['submitted']['rating_id']['#value'];
+		}
+		
+		if($key == 'domain_account_id') {
+			$curlData['domainAccountId'] = $form['submitted']['domain_account_id']['#value'];
+		}
+		
+		if($key == 'guid') {
+			$curlData['guid'] = $form['submitted']['guid']['#value'];
+		}
+		
+		if('questions_' == substr($key,0,10)) {
+			$qID = substr($key,11);
+			$qLassoID = 'Questions['.$qID.']';
+			$curlData[$qLassoID] = $form['submitted'][$key]['#value'];
 		}
 		
 	}
