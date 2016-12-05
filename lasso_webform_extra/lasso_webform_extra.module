@@ -2,17 +2,23 @@
 
 function lasso_webform_extra_form_alter(&$form, &$form_state, $form_id) {
 
-   // for internal testing purposes we are using "webform_client_form_119"
+	// for internal testing purposes we are using "webform_client_form_119"
    
-   $active_form = variable_get('lasso_webform_id');
-   // $form_arr = explode(",",$active_form);
-   $form_arr = array_map('trim', explode(",", $active_form));
+	$active_form = variable_get('lasso_webform_id');
+	// $form_arr = explode(",",$active_form);
+	$form_arr = array_map('trim', explode(",", $active_form));
    
-   foreach ($form_arr as $form_value) {
-	   if ($form_id == $form_value) {
-		   $form['#submit'][] = 'lasso_webform_extra_curl_submit';
-	   }
-   }
+	$quickSet = variable_get('lasso_webform_quickset');
+   
+	foreach ($form_arr as $form_value) {
+		if ($form_id == $form_value) {
+			if ($quickSet == 1) {
+				$form['#submit'][] = 'lasso_webform_extra_quickset';
+			} else {
+				$form['#submit'][] = 'lasso_webform_extra_curl_submit';
+			}
+		}
+	}
 
 }
 
@@ -55,6 +61,67 @@ Custom questions also supported:
 Questions[XXXXX] - questions_XXXXX
 
 */
+
+function lasso_webform_extra_quickset(&$form, &$form_state) {
+	
+	$quickData = array();
+	
+	foreach ($form['submitted'] as $key => $value) {
+
+		if('questions_' == substr($key,0,10)) {
+			$qID = substr($key,10);
+			$qLassoID = 'Questions['.$qID.']';
+			$quickData[$qLassoID] = $form['submitted'][$key]['#value'];
+		} elseif ($key == 'Primary' || $key == 'Secondary' || $key == 'Tertiary') {
+			$qLassoID = 'Emails['.$key.']';
+			$quickData[$qLassoID] = $form['submitted'][$key]['#value'];
+		} elseif ($key == 'Home' || $key == 'Cell' || $key == 'Work' || $key == 'WorkExt' || $key == 'Fax' || $key == 'Pager') {
+			$qLassoID = 'Phones['.$key.']';
+			$quickData[$qLassoID] = $form['submitted'][$key]['#value'];
+		} else {
+			$quickData[$key] = $form['submitted'][$key]['#value'];
+		}
+		
+	}
+	
+	$quickQuery = http_build_query($quickData);
+	
+	lasso_webform_extra_cURL($quickQuery);
+	
+}
+
+function lasso_webform_extra_cURL($lassoQuery) {
+	
+	$url = variable_get('lasso_webform_url');
+	$debug = variable_get('lasso_webform_debug');
+
+	$ch = curl_init();
+	// curl_setopt($ch, CURLOPT_URL, variable_get('lasso_webform_url'));
+	curl_setopt($ch, CURLOPT_URL, $url);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $lassoQuery);
+	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
+	curl_setopt($ch, CURLOPT_MAXREDIRS, 0);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
+	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
+	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+
+	$result = curl_exec($ch);
+    $error = curl_error($ch);
+	
+	// $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+	$response = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
+	
+	if ($result === FALSE) {
+		watchdog('Lasso Webform', 'Using Quickset - Failed to post using cURL:<br>'.print_r($lassoQuery,TRUE).'<br>Target URL: '.print_r($url,TRUE).'<br>Error: '.print_r(curl_error($ch),TRUE).'<br>Error Code: '.print_r(curl_errno($ch),TRUE), array(), WATCHDOG_ERROR);
+	} else {
+		if ($debug == 1) {
+			watchdog('Lasso Webform', 'Using Quickset - Posted the following using cURL:<br>'.print_r($lassoQuery,TRUE).'<br>Target URL: '.print_r($url,TRUE).'<br>Response: '.print_r($response,TRUE));
+		}
+	}
+	
+	curl_close($ch);	
+	
+}
 
 function lasso_webform_extra_curl_submit(&$form, &$form_state) {
 
@@ -186,6 +253,7 @@ function lasso_webform_extra_curl_submit(&$form, &$form_state) {
 	// main url = https://app.lassocrm.com/registrant_signup/
 	
 	$url = variable_get('lasso_webform_url');
+	$debug = variable_get('lasso_webform_debug');
 
 	$ch = curl_init();
 	// curl_setopt($ch, CURLOPT_URL, variable_get('lasso_webform_url'));
@@ -206,7 +274,9 @@ function lasso_webform_extra_curl_submit(&$form, &$form_state) {
 	if ($result === FALSE) {
 		watchdog('Lasso Webform', 'Failed to post using cURL:<br>'.print_r($curlQuery,TRUE).'<br>Target URL: '.print_r($url,TRUE).'<br>Error: '.print_r(curl_error($ch),TRUE).'<br>Error Code: '.print_r(curl_errno($ch),TRUE), array(), WATCHDOG_ERROR);
 	} else {
-		watchdog('Lasso Webform', 'Posted the following using cURL:<br>'.print_r($curlQuery,TRUE).'<br>Target URL: '.print_r($url,TRUE).'<br>Response: '.print_r($response,TRUE));
+		if ($debug == 1) {
+			watchdog('Lasso Webform', 'Posted the following using cURL:<br>'.print_r($curlQuery,TRUE).'<br>Target URL: '.print_r($url,TRUE).'<br>Response: '.print_r($response,TRUE));
+		}
 	}
 	
 	curl_close($ch);
@@ -249,6 +319,22 @@ function lasso_webform_extra_admin($form, &$form_state) {
 		'#size' => 100,
 		'#description' => t('Enter Webform IDs [e.g. webform_client_form_###]. To enter more than one, seperate each ID with a comma.'),
 		'#required' => TRUE,
+	);
+
+	$form['lasso_webform_quickset'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Quickset Form Values'),
+		'#default_value' => variable_get('lasso_webform_quickset', array('')),
+		'#description' => t('Converts all form values into cURL query string. Warning: Experimental.'),
+		'#required' => FALSE,
+	);
+	
+	$form['lasso_webform_debug'] = array(
+		'#type' => 'checkbox',
+		'#title' => t('Debug Mode'),
+		'#default_value' => variable_get('lasso_webform_debug', array('')),
+		'#description' => t('Turns on verbose logging. Without this set, only Error conditions will be reported. Useful for checking the POST string and server response.'),
+		'#required' => FALSE,
 	);
 
 	return system_settings_form($form);

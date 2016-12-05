@@ -1,5 +1,5 @@
 # Lasso Drupal Webform Integration
-v 0.2.2
+v 0.3.0
 
 Integration with Drupal 7 Webform 4.x and Lasso Register API
 
@@ -8,6 +8,12 @@ Integration with Drupal 7 Webform 4.x and Lasso Register API
 - Drupal 7.x
 - Webform 4.x
 - cURL
+
+#Features
+
+- Supports multiple forms using the same target URL
+- A choice between having all form submissions to be filtered based on Webform Keys or "Submit and Pray".
+- A debug mode which reports both successful and unsuccessful submissions. Useful for remote server codes.
 
 # Quick Start
 
@@ -25,9 +31,15 @@ Integration with Drupal 7 Webform 4.x and Lasso Register API
 
 # More Information
 
-This module is fairly simple in operation, and is in need of serious optimization. Upon a Webform submit, the module uses webform_alter() to capture the event, and then checks the Webform ID against an array of saved IDs. If they match, this kicks off a function where the Weform data is parsed based on the Form Key value, converting them to Lasso friendly names and values in an array. Then this Lasso friendly array is converted to a query string, and finally passed to cURL, where the query string is posted to the Lasso API. Each post is recorded to the Drupal log. (Note to self: create a de-bug option so only cURL errors are saved by default.)
+This module is fairly simple in operation, and is in need of serious optimization. Upon a Webform submit, the module uses webform_alter() to capture the event, and then checks the Webform ID against an array of saved IDs. If they match, this kicks off a function where the Weform data is parsed based on the Form Key value, converting them to Lasso friendly names and values in an array. Then this Lasso friendly array is converted to a query string, and finally passed to cURL, where the query string is posted to the Lasso API.
 
-Here is the list of supported Lasso query variables and their supported Webform Form Keys. I tried to ensure that their standard would conform to what Drupal will create automatically, but there is the potential for variance.
+If the Quick Set option is selected from the administration screen, then all webform fields will be formatted and submitted. The module will still try to tease out Questions, Phone, and Email and format them correctly (see table, below). When using Quick Set, it is important to match the Webform key exactly to the Lasso CRM value you are trying to match (for example: LastName for the Lasso variable LastName - see your Lasso documentation for more information). Please remember that this feature is expermental.
+
+If the Debug option is selected, the module will report all responses from cURL, not just those that fail (from timeout for example). This is very useful for reviewing the remote server codes and checking to make sure your final query string is properilly formatted. Remember, any time cURL gets a response, it counts as successful, so even hitting the wrong URL will look like it worked.
+
+The first table is the list of supported Lasso query variables and their supported Webform Form Keys. I tried to ensure that their standard would conform to what Drupal will create automatically, but there is the potential for variance.
+
+The second table is a listing of special Lasso variables and their corrsponsing Webform keys. Remember, you must always match the letter case.
 
 Please note: At this stage, the module is not configured for multiple values (i.e. NameTitle and ContactPreference) in a select field.
 
@@ -65,7 +77,23 @@ Please note: At this stage, the module is not configured for multiple values (i.
 The Lasso query variable Questions is now supported using the following convention:
 
 	Questions[XXXXX]		-	questions_XXXXX
+	
+Using Quick Set:
 
+	Lasso Form Field Name   -   Webform Form Key
+	-------------------------------------------------
+	Emails[Primary]         -   Primary
+	Emails[Secondary]       -   Secondary
+	Emails[Tertiary]        -   Tertiary
+	Phones[Home]            -   Home
+	Phones[Cell]            -   Cell
+	Phones[Work]            -   Work
+	Phones[WorkExt]         -   Workext
+	Phones[Fax]             -   Fax
+	Phones[Pager]           -   Pager
+	
+The Questions variable works the same as stated above.	
+	
 The following Lasso query variables are not supported.
 
 	SignupThankyouLink
