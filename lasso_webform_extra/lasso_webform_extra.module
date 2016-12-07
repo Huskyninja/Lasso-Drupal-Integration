@@ -65,6 +65,7 @@ Questions[XXXXX] - questions_XXXXX
 function lasso_webform_extra_quickset(&$form, &$form_state) {
 	
 	$quickData = array();
+	$useQuickSet = 1;
 	
 	foreach ($form['submitted'] as $key => $value) {
 
@@ -86,44 +87,13 @@ function lasso_webform_extra_quickset(&$form, &$form_state) {
 	
 	$quickQuery = http_build_query($quickData);
 	
-	lasso_webform_extra_cURL($quickQuery);
-	
-}
-
-function lasso_webform_extra_cURL($lassoQuery) {
-	
-	$url = variable_get('lasso_webform_url');
-	$debug = variable_get('lasso_webform_debug');
-
-	$ch = curl_init();
-	// curl_setopt($ch, CURLOPT_URL, variable_get('lasso_webform_url'));
-	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_POSTFIELDS, $lassoQuery);
-	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
-	curl_setopt($ch, CURLOPT_MAXREDIRS, 0);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
-	curl_setopt($ch, CURLOPT_SSL_VERIFYHOST, 0);
-	curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
-
-	$result = curl_exec($ch);
-    $error = curl_error($ch);
-	
-	// $http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
-	$response = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
-	
-	if ($result === FALSE) {
-		watchdog('Lasso Webform', 'Using Quickset - Failed to post using cURL:<br>'.print_r($lassoQuery,TRUE).'<br>Target URL: '.print_r($url,TRUE).'<br>Error: '.print_r(curl_error($ch),TRUE).'<br>Error Code: '.print_r(curl_errno($ch),TRUE), array(), WATCHDOG_ERROR);
-	} else {
-		if ($debug == 1) {
-			watchdog('Lasso Webform', 'Using Quickset - Posted the following using cURL:<br>'.print_r($lassoQuery,TRUE).'<br>Target URL: '.print_r($url,TRUE).'<br>Response: '.print_r($response,TRUE));
-		}
-	}
-	
-	curl_close($ch);	
+	lasso_webform_extra_cURL($quickQuery, $useQuickSet);
 	
 }
 
 function lasso_webform_extra_curl_submit(&$form, &$form_state) {
+
+	$useQuickSet = 0;
 
 	// mapping Lasso's sometimes unusual required naming convention to the module's naming convention
 
@@ -249,16 +219,22 @@ function lasso_webform_extra_curl_submit(&$form, &$form_state) {
 
 	$curlQuery = http_build_query($curlData);
 	
+	lasso_webform_extra_cURL($curlQuery, $useQuickSet);
+
+}
+
+function lasso_webform_extra_cURL($lassoQuery, $reportQuickSet) {
+
 	// test url = https://app.lassocrm.com/registrant_signup/test
 	// main url = https://app.lassocrm.com/registrant_signup/
 	
 	$url = variable_get('lasso_webform_url');
 	$debug = variable_get('lasso_webform_debug');
-
+	
 	$ch = curl_init();
 	// curl_setopt($ch, CURLOPT_URL, variable_get('lasso_webform_url'));
 	curl_setopt($ch, CURLOPT_URL, $url);
-	curl_setopt($ch, CURLOPT_POSTFIELDS, $curlQuery);
+	curl_setopt($ch, CURLOPT_POSTFIELDS, $lassoQuery);
 	curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 15);
 	curl_setopt($ch, CURLOPT_MAXREDIRS, 0);
 	curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, 0);
@@ -272,15 +248,23 @@ function lasso_webform_extra_curl_submit(&$form, &$form_state) {
 	$response = curl_getinfo($ch, CURLINFO_RESPONSE_CODE);
 	
 	if ($result === FALSE) {
-		watchdog('Lasso Webform', 'Failed to post using cURL:<br>'.print_r($curlQuery,TRUE).'<br>Target URL: '.print_r($url,TRUE).'<br>Error: '.print_r(curl_error($ch),TRUE).'<br>Error Code: '.print_r(curl_errno($ch),TRUE), array(), WATCHDOG_ERROR);
+		if ($reportQuickSet == 1) {
+			watchdog('Lasso Webform', 'Using Quickset - Failed to post using cURL:<br>'.print_r($lassoQuery,TRUE).'<br>Target URL: '.print_r($url,TRUE).'<br>Error: '.print_r(curl_error($ch),TRUE).'<br>Error Code: '.print_r(curl_errno($ch),TRUE), array(), WATCHDOG_ERROR);
+		} else {
+			watchdog('Lasso Webform', 'Failed to post using cURL:<br>'.print_r($lassoQuery,TRUE).'<br>Target URL: '.print_r($url,TRUE).'<br>Error: '.print_r(curl_error($ch),TRUE).'<br>Error Code: '.print_r(curl_errno($ch),TRUE), array(), WATCHDOG_ERROR);
+		}
 	} else {
 		if ($debug == 1) {
-			watchdog('Lasso Webform', 'Posted the following using cURL:<br>'.print_r($curlQuery,TRUE).'<br>Target URL: '.print_r($url,TRUE).'<br>Response: '.print_r($response,TRUE));
+			if ($reportQuickSet == 1) {
+				watchdog('Lasso Webform', 'Using Quickset - Posted the following using cURL:<br>'.print_r($lassoQuery,TRUE).'<br>Target URL: '.print_r($url,TRUE).'<br>Response: '.print_r($response,TRUE));
+			} else {
+				watchdog('Lasso Webform', 'Posted the following using cURL:<br>'.print_r($lassoQuery,TRUE).'<br>Target URL: '.print_r($url,TRUE).'<br>Response: '.print_r($response,TRUE));
+			}
 		}
 	}
 	
-	curl_close($ch);
-
+	curl_close($ch);	
+	
 }
 
 // Drupal admin functions
